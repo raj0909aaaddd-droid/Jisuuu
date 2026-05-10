@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Jisuu - A Memory Diary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- BASE & VARIABLES (Twilight Stardust Theme) --- */
+        :root {
+            --bg-dark: #0a0c10;
+            --paper-light: #fdfbf7; 
+            --paper-dark: #e8dfd3;
+            --ink-color: #2c303a;
+            --gold-accent: #d4af37; /* Rich Metallic Gold */
+            --leather: #1c212b; /* Midnight Navy/Black Leather */
+            --tape: rgba(255, 255, 255, 0.4);
+            --font-serif: 'Playfair Display', serif;
+            --font-hand: 'Caveat', cursive;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Ultra-Realistic Cinematic Twilight Background */
+            background-image: url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?q=80&w=2072&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--paper-light);
+            font-family: var(--font-serif);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            perspective: 1500px;
+        }
+
+        /* Darker overlay for a moody cinematic night feel */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 25, 0.6); 
+            z-index: -1;
+        }
+
+        /* --- THE ENTRY GATE --- */
+        #entry-gate {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(20,25,35,0.85) 0%, rgba(5,8,12,0.98) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 2s ease, visibility 2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .elegant-title {
+            font-size: 4.5rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            color: #f7e6b0;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 0.5s;
+        }
+
+        .subtitle {
+            font-family: var(--font-hand);
+            font-size: 2rem;
+            color: #d8cba5;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 1.5s;
+        }
+
+        #unlock-btn {
+            margin-top: 40px;
+            padding: 12px 35px;
+            background: transparent;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 30px;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 2.5s;
+            transition: all 0.4s ease;
+        }
+
+        #unlock-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* --- DIARY LAYOUT & 3D PHYSICS --- */
+        #diary-wrapper {
+            width: 90vw;
+            max-width: 500px;
+            height: 75vh;
+            max-height: 700px;
+            position: relative;
+            transition: opacity 2s ease;
+            box-shadow: 20px 20px 60px rgba(0,0,0,0.8); /* Deeper shadow for details */
+        }
+
+        /* Simulating the thick stack of pages on the right edge */
+        #diary-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 2%; right: -8px;
+            width: 8px; height: 96%;
+            background: repeating-linear-gradient(to bottom, #e8dfd3 0px, #fdfbf7 2px);
+            border-radius: 0 5px 5px 0;
+            z-index: -1;
+            box-shadow: inset 2px 0 5px rgba(0,0,0,0.2);
+        }
+
+        .diary {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .page {
+            position: absolute;
+            top: 0; right: 0;
+            width: 100%; height: 100%;
+            transform-origin: left center;
+            transition: transform 1.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .diary .page:nth-child(1) { z-index: 6; }
+        .diary .page:nth-child(2) { z-index: 5; }
+        .diary .page:nth-child(3) { z-index: 4; }
+        .diary .page:nth-child(4) { z-index: 3; }
+        .diary .page:nth-child(5) { z-index: 2; }
+        .diary .page:nth-child(6) { z-index: 1; }
+
+        /* --- TEXTURES & NEW DETAILS --- */
+        .leather-texture {
+            width: 100%; height: 100%;
+            background: linear-gradient(to right, #11151c, var(--leather), #11151c);
+            border-radius: 5px 15px 15px 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+            position: absolute;
+            backface-visibility: hidden;
+        }
+
+        /* NEW: Gold Leather Stitching */
+        .leather-stitching {
+            position: absolute;
+            top: 8px; bottom: 8px; left: 8px; right: 8px;
+            border: 2px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 4px 12px 12px 4px;
+            pointer-events: none;
+        }
+
+        /* NEW: Metal Cover Corners */
+        .metal-corner {
+            position: absolute;
+            width: 35px; height: 35px;
+            background: linear-gradient(135deg, #fceabb, #f8b500);
+            box-shadow: inset 1px 1px 4px rgba(255,255,255,0.6), 1px 1px 5px rgba(0,0,0,0.6);
+            z-index: 2;
+        }
+        .metal-corner.top-right { top: 0; right: 0; border-radius: 0 15px 0 100%; }
+        .metal-corner.bottom-right { bottom: 0; right: 0; border-radius: 100% 0 15px 0; }
+
+        /* NEW: Silk Bookmark Ribbon */
+        .bookmark-ribbon {
+            position: absolute;
+            top: -15px; right: 40px;
+            width: 25px; height: 120px;
+            background: linear-gradient(to right, #6b1b2f, #8a253e, #6b1b2f);
+            box-shadow: 2px 5px 10px rgba(0,0,0,0.5);
+            z-index: -1;
+            border-radius: 2px;
+        }
+
+        .gold-emboss {
+            color: var(--gold-accent);
+            font-size: 3rem;
+            text-shadow: -1px -1px 0 rgba(255,255,255,0.2), 2px 2px 5px rgba(0,0,0,0.9);
+            border-bottom: 2px solid var(--gold-accent);
+            padding-bottom: 10px;
+            z-index: 2;
+        }
+
+        .paper-texture {
+            width: 100%; height: 100%;
+            background: var(--paper-light);
+            background-image: 
+                linear-gradient(90deg, rgba(0,0,0,0.1) 0%, transparent 8%),
+                radial-gradient(circle at 50% 50%, transparent 70%, rgba(139, 115, 85, 0.15) 100%);
+            border-radius: 3px 10px 10px 3px;
+            padding: 35px 25px;
+            color: var(--ink-color);
+            position: absolute;
+            backface-visibility: hidden;
+            overflow: hidden;
+            box-shadow: inset -5px 0 10px rgba(0,0,0,0.05); /* Adds paper curve */
+        }
+
+        .page.flipped .paper-texture {
+            background: var(--paper-dark);
+            box-shadow: inset 5px 0 10px rgba(0,0,0,0.05);
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .elegant-heading {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: #2c303a;
+        }
+
+        .handwritten {
+            font-family: var(--font-hand);
+            font-size: 1.6rem;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+
+        .highlight-text {
+            font-size: 1.9rem;
+            color: #1a2530;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-top: 1px dashed rgba(44, 48, 58, 0.3);
+            border-bottom: 1px dashed rgba(44, 48, 58, 0.3);
+        }
+
+        .text-center-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .date {
+            font-size: 1.1rem;
+            color: #5a6270;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .mt-2 { margin-top: 20px; }
+
+        .tape {
+            position: absolute;
+            background: var(--tape);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            height: 30px;
+            width: 80px;
+            backdrop-filter: blur(2px);
+        }
+        .tape.top-center { top: 15px; left: 50%; transform: translateX(-50%) rotate(-3deg); }
+
+        /* --- CINEMATIC ENDING --- */
+        .ending-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(to bottom, var(--paper-light), #e3d5c8);
+        }
+
+        .glowing-center h3 {
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            font-size: 2.8rem;
+        }
+
+        /* --- ANIMATIONS & STARDUST PARTICLES --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Glowing Fireflies / Stardust */
+        .stardust {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%; 
+            box-shadow: 0 0 15px 3px rgba(255, 223, 107, 0.8);
+            opacity: 0.8;
+            animation: floatUp linear infinite, glow ease-in-out infinite alternate;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) translateX(0px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px 1px rgba(255, 223, 107, 0.5); opacity: 0.6; }
+            to { box-shadow: 0 0 20px 5px rgba(255, 223, 107, 1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="YOUR_AMBIENT_MUSIC.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="page-turn">
+        <source src="YOUR_PAGE_FLIP_SOUND.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="particles"></div>
+
+    <div id="entry-gate">
+        <h1 class="elegant-title">Jisuu ✨</h1>
+        <p class="subtitle">Written in the stars...</p>
+        <button id="unlock-btn">Open Our Story</button>
+    </div>
+
+    <div id="diary-wrapper" class="hidden">
+        <div class="diary">
+            
+            <div class="page cover front-cover" onclick="flipPage(this)">
+                <div class="bookmark-ribbon"></div>
+                <div class="leather-texture">
+                    <div class="leather-stitching"></div>
+                    <div class="metal-corner top-right"></div>
+                    <div class="metal-corner bottom-right"></div>
+                    <h2 class="gold-emboss">For Jisuu 🌙</h2>
+                </div>
+            </div>
+
+            <div class="page right-page" onclick="flipPage(this)">
+                <div class="paper-texture">
+                    <p class="handwritten date">A starry night, 2026</p>
+                    <h3 class="elegant-heading">Dear Jisuu, 💫</h3>
+                    <p class="handwritten body-text">
+                        There is something incredibly rare about finding someone whose energy perfectly matches yours. You are that rare kind of magic in my life. ✨
+                    </p>
+                    <p class="handwritten body-text mt-2">
+                        I wanted to make something entirely unique for you, a place where all the appreciation and love I have for you is written down so you never, ever forget it. 🦋
+                    </p>
+                </div>
+            </div>
+
+            <div class="page right-page" onclick="flipPage(this)">
+                <div class="paper-texture text-center-page">
+                    <h3 class="elegant-heading">A Constant Light 🌟</h3>
+                    <p class="handwritten highlight-text">
+                        "Out of all the stars in the night sky, your light is the one that guides me home." 🌌
+                    </p>
+                    <p class="handwritten body-text mt-2">
+                        You have this amazing ability to make everything better just by being there. Your presence is calming, your spirit is beautiful, and knowing you is one of the greatest privileges of my life. 🥺💛
+                    </p>
+                    <div class="tape top-center"></div>
+                </div>
+            </div>
+
+            <div class="page right-page" onclick="flipPage(this)">
+                <div class="paper-texture">
+                    <h3 class="elegant-heading">No Matter What 🤍</h3>
+                    <p class="handwritten body-text">
+                        I want you to know that wherever life takes us, my support for you is unconditional. Whenever things get dark, you will never have to face the shadows alone. I've got you. Always. ♾️✨
+                    </p>
+                    <p class="handwritten body-text mt-2">
+                        Thank you for being exactly who you are, Jisuu. The world is simply better with you in it. 🌻💛
+                    </p>
+                </div>
+            </div>
+
+            <div class="page right-page" onclick="flipPage(this)">
+                <div class="paper-texture ending-page">
+                    <div class="glowing-center">
+                        <h3 class="elegant-heading">Forever Shining. 🌙</h3>
+                        <p class="handwritten subtitle">Yours, always. ✨</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page cover back-cover">
+                <div class="leather-texture">
+                    <div class="leather-stitching"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Elements ---
+        const unlockBtn = document.getElementById('unlock-btn');
+        const entryGate = document.getElementById('entry-gate');
+        const diaryWrapper = document.getElementById('diary-wrapper');
+        const bgMusic = document.getElementById('bg-music');
+        const pageTurnSound = document.getElementById('page-turn');
+
+        // --- Entry Gate & Audio Unlock ---
+        unlockBtn.addEventListener('click', () => {
+            entryGate.style.opacity = '0';
+            
+            bgMusic.volume = 0.3; 
+            bgMusic.play().catch(error => console.log("Audio play prevented by browser"));
+
+            setTimeout(() => {
+                entryGate.style.display = 'none';
+                diaryWrapper.classList.remove('hidden');
+                diaryWrapper.style.opacity = '1';
+            }, 2000); 
+        });
+
+        // --- Page Flipping Logic ---
+        function flipPage(pageElement) {
+            pageTurnSound.currentTime = 0; 
+            pageTurnSound.volume = 0.6;
+            pageTurnSound.play().catch(e => console.log("Audio not allowed yet"));
+
+            pageElement.classList.toggle('flipped');
+
+            const allPages = document.querySelectorAll('.page');
+            
+            if (pageElement.classList.contains('flipped')) {
+                setTimeout(() => {
+                    pageElement.style.zIndex = 0; 
+                }, 500); 
+            } else {
+                let index = Array.from(allPages).indexOf(pageElement);
+                setTimeout(() => {
+                    pageElement.style.zIndex = allPages.length - index;
+                }, 500);
+            }
+        }
+
+        // --- Cinematic Rising Stardust / Fireflies ---
+        function createStardust() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 45; // slightly more for a magical starry feel
+
+            for (let i = 0; i < particleCount; i++) {
+                let star = document.createElement('div');
+                star.classList.add('stardust');
+                
+                let size = Math.random() * 4 + 2; // small glowing dots (2px to 6px)
+                let posX = Math.random() * 100; // 0 to 100vw
+                let delay = Math.random() * 15; // staggering delays
+                let floatDuration = Math.random() * 15 + 10; // 10s to 25s to float up
+                let glowDuration = Math.random() * 2 + 1; // flicker speed
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${posX}vw`;
+                star.style.animationDelay = `${delay}s, ${Math.random()}s`;
+                star.style.animationDuration = `${floatDuration}s, ${glowDuration}s`;
+                
+                // Color variations: Some pure white, some warm gold, some soft yellow
+                let colorRandom = Math.random();
+                if(colorRandom > 0.8) {
+                    star.style.background = '#ffffff'; 
+                    star.style.boxShadow = '0 0 10px 2px rgba(255, 255, 255, 0.8)';
+                } else if (colorRandom > 0.4) {
+                    star.style.background = '#fceabb'; 
+                    star.style.boxShadow = '0 0 15px 3px rgba(252, 234, 187, 0.8)';
+                } else {
+                    star.style.background = '#ffdf6b'; 
+                    star.style.boxShadow = '0 0 15px 3px rgba(255, 223, 107, 0.8)';
+                }
+
+                particlesContainer.appendChild(star);
+            }
+        }
+
+        createStardust();
+    </script>
+</body>
+  </html>
+  
